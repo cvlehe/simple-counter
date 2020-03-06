@@ -6,17 +6,18 @@ import './styles.scss';
 const useLocalStorage = (initialState, key) => {
   const get = () => {
     const storage = localStorage.getItem(key);
-    console.log(storage);
     if (storage) return JSON.parse(storage)[value];
+    localStorage.setItem(key, JSON.stringify({ value: initialState }));
     return initialState;
   };
 
   const [value, setValue] = useState(get());
+
   useEffect(() => {
     localStorage.setItem(key, JSON.stringify({ value }));
   }, [value]);
 
-  return [value, setValue];
+  return [value || initialState, setValue];
 };
 
 const Counter = ({ max, step }) => {
@@ -25,13 +26,12 @@ const Counter = ({ max, step }) => {
   useEffect(() => {
     document.title = `${count}`;
     setCount(count);
+    const id = setInterval(() => console.log(`${count}`), 1000);
+    return () => clearInterval(id);
   }, [count]);
 
   const increment = () => {
-    setCount(c => {
-      if (c >= max) return c;
-      return c + step;
-    });
+    setCount(c => c + 1);
   };
   const decrement = () => {
     setCount(c => {
