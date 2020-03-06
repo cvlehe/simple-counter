@@ -1,14 +1,49 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { render } from 'react-dom';
 
 import './styles.scss';
 
-const Counter = props => {
-  const [count, setCount] = React.useState(0);
+const useLocalStorage = (initialState, key) => {
+  const get = () => {
+    const storage = localStorage.getItem(key);
+    console.log(storage);
+    if (storage) return JSON.parse(storage)[value];
+    return initialState;
+  };
 
-  const increment = () => setCount(count + 1);
-  const decrement = () => setCount(count - 1);
+  const [value, setValue] = useState(get());
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify({ value }));
+  }, [value]);
+
+  return [value, setValue];
+};
+
+const Counter = ({ max, step }) => {
+  const [count, setCount] = useLocalStorage(0, 'count');
+
+  useEffect(() => {
+    document.title = `${count}`;
+    setCount(count);
+  }, [count]);
+
+  const increment = () => {
+    setCount(c => {
+      if (c >= max) return c;
+      return c + step;
+    });
+  };
+  const decrement = () => {
+    setCount(c => {
+      if (c <= 0) return c;
+      return c - step;
+    });
+  };
   const reset = () => setCount(0);
+
+  useEffect(() => {
+    document.title = `Counter: ${count}`;
+  });
   return (
     <div className="Counter">
       <p className="count">{count}</p>
@@ -21,4 +56,4 @@ const Counter = props => {
   );
 };
 
-render(<Counter />, document.getElementById('root'));
+render(<Counter max={15} step={5} />, document.getElementById('root'));
